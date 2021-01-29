@@ -78,18 +78,17 @@ class SettingsDialog(QDialog):
         form_layout.setLabelAlignment(QtCore.Qt.AlignLeft)
         groupbox.setLayout(form_layout)
         # Draw UI
-        self.sampling(form_layout)
-        self.bitrate(form_layout)
-        self.devices(form_layout)
-        self.channels(form_layout)
-        self.destination(form_layout)
-        self.duration(form_layout)
-        self.automate_recording(form_layout)
-        self.am_checkboxes(form_layout)
-        self.pm_checkboxes(form_layout)
+        self._sampling(form_layout)
+        self._bitrate(form_layout)
+        self._devices(form_layout)
+        self._channels(form_layout)
+        self._destination(form_layout)
+        self._duration(form_layout)
+        self._automate_recording(form_layout)
+        self._am_checkboxes(form_layout)
+        self._pm_checkboxes(form_layout)
 
-
-    def sampling(self, form_layout):
+    def _sampling(self, form_layout):
         """ """
         self.sampling = QComboBox(self)
         self.sampling_list = {
@@ -100,7 +99,7 @@ class SettingsDialog(QDialog):
         self.sampling.addItems(self.sampling_list)
         form_layout.addRow('Sampling Rate: ', self.sampling)
 
-    def bitrate(self, form_layout):
+    def _bitrate(self, form_layout):
         """ Bit rate UI """
         self.bitrates = QComboBox(self)
         self.bitrate_list = {
@@ -113,7 +112,7 @@ class SettingsDialog(QDialog):
         self.bitrates.addItems(self.bitrate_list)
         form_layout.addRow('Bit Rate: ', self.bitrates)
 
-    def devices(self, form_layout):
+    def _devices(self, form_layout):
         """ Devices UI """
         self.devices = QComboBox(self)
         devices = SounderDevices()
@@ -123,7 +122,7 @@ class SettingsDialog(QDialog):
         self.devices.addItems(self.device_list)
         form_layout.addRow('Recording Device: ', self.devices)
 
-    def channels(self, form_layout):
+    def _channels(self, form_layout):
         """ Audio channel UI"""
         self.channel = QComboBox(self)
         self.channel_list = {
@@ -134,7 +133,7 @@ class SettingsDialog(QDialog):
         form_layout.addRow('Audio Channel: ', self.channel)
         form_layout.setAlignment(QtCore.Qt.AlignLeft)
 
-    def destination(self, form_layout):
+    def _destination(self, form_layout):
         """ Recording destination """
         self.button = QPushButton("Choose Dir")
         self.display_dir = QLabel("Not Set")
@@ -142,7 +141,7 @@ class SettingsDialog(QDialog):
         self.button.setFixedWidth(100)
         form_layout.addRow(self.button, self.display_dir)
 
-    def duration(self, form_layout):
+    def _duration(self, form_layout):
         """ Audio recording duration UI """
         self.duration = QComboBox()
         self.durations = {
@@ -154,7 +153,7 @@ class SettingsDialog(QDialog):
         self.duration.setFixedWidth(250)
         form_layout.addRow('Duration', self.duration)
 
-    def automate_recording(self, form_layout):
+    def _automate_recording(self, form_layout):
         """ Automate recording UI"""
         auto_label = QLabel('Auto Recording')
         form_layout.addRow(auto_label)
@@ -172,7 +171,7 @@ class SettingsDialog(QDialog):
         self.manual_radio.toggled.connect(self.displayAvailTime)
         form_layout.addRow(self.manual_radio)
 
-    def am_checkboxes(self, form_layout):
+    def _am_checkboxes(self, form_layout):
         """ Checkboxes for managing AM time for manual recording """
         self.groupTimebox = QGroupBox("AM")
         self.groupTimebox.hide()
@@ -228,7 +227,7 @@ class SettingsDialog(QDialog):
         am_11.value = 11
         time_layout.addWidget(am_11, 2, 3)
 
-    def pm_checkboxes(self, form_layout ):
+    def _pm_checkboxes(self, form_layout ):
         """ Checkboxes for managing PM time for manual recording """
         self.groupTimePMbox = QGroupBox("PM")
         self.groupTimePMbox.hide()
