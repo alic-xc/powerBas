@@ -73,12 +73,24 @@ class SettingsDialog(QDialog):
         """ GUI for sampling rate and logic """
         groupbox = QGroupBox("System Settings")
         layout.addWidget(groupbox, 0,0)
-        formLayout = QFormLayout()
-        formLayout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
-        formLayout.setLabelAlignment(QtCore.Qt.AlignLeft)
-        groupbox.setLayout(formLayout)
+        form_layout = QFormLayout()
+        form_layout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
+        form_layout.setLabelAlignment(QtCore.Qt.AlignLeft)
+        groupbox.setLayout(form_layout)
+        # Draw UI
+        self.sampling(form_layout)
+        self.bitrate(form_layout)
+        self.devices(form_layout)
+        self.channels(form_layout)
+        self.destination(form_layout)
+        self.duration(form_layout)
+        self.automate_recording(form_layout)
+        self.am_checkboxes(form_layout)
+        self.pm_checkboxes(form_layout)
 
-        # Sampling UI
+
+    def sampling(self, form_layout):
+        """ """
         self.sampling = QComboBox(self)
         self.sampling_list = {
             '44,100khz (Highly Recommended)': 44100,
@@ -86,9 +98,10 @@ class SettingsDialog(QDialog):
             '20,00khz (Use with caution)': 20000
         }
         self.sampling.addItems(self.sampling_list)
-        formLayout.addRow('Sampling Rate: ', self.sampling)
+        form_layout.addRow('Sampling Rate: ', self.sampling)
 
-        # Bit rate UI
+    def bitrate(self, form_layout):
+        """ Bit rate UI """
         self.bitrates = QComboBox(self)
         self.bitrate_list = {
             'Int24 (Highly Recommend)': 24,
@@ -98,38 +111,39 @@ class SettingsDialog(QDialog):
             'Float32': 64,
         }
         self.bitrates.addItems(self.bitrate_list)
-        formLayout.addRow('Bit Rate: ', self.bitrates)
+        form_layout.addRow('Bit Rate: ', self.bitrates)
 
-        # Devices UI
+    def devices(self, form_layout):
+        """ Devices UI """
         self.devices = QComboBox(self)
         devices = SounderDevices()
         avail_devices = devices.getdevices()['0']
-        self.device_list = {
-        }
+        self.device_list = {}
         self.device_list.update(avail_devices)
         self.devices.addItems(self.device_list)
+        form_layout.addRow('Recording Device: ', self.devices)
 
-        formLayout.addRow('Recording Device: ', self.devices)
-
-        # Channel
+    def channels(self, form_layout):
+        """ Audio channel UI"""
         self.channel = QComboBox(self)
         self.channel_list = {
             'mono (1)': 1,
             'stero (2)': 2
         }
         self.channel.addItems(self.channel_list)
-        formLayout.addRow('Audio Channel: ', self.channel)
-        formLayout.setAlignment(QtCore.Qt.AlignLeft)
+        form_layout.addRow('Audio Channel: ', self.channel)
+        form_layout.setAlignment(QtCore.Qt.AlignLeft)
 
-        # Directory UI
+    def destination(self, form_layout):
+        """ Recording destination """
         self.button = QPushButton("Choose Dir")
         self.display_dir = QLabel("Not Set")
         self.button.clicked.connect(self.set_directory)
-
         self.button.setFixedWidth(100)
-        formLayout.addRow(self.button, self.display_dir )
+        form_layout.addRow(self.button, self.display_dir)
 
-        # Duration UI
+    def duration(self, form_layout):
+        """ Audio recording duration UI """
         self.duration = QComboBox()
         self.durations = {
             '3m': 180,
@@ -138,105 +152,140 @@ class SettingsDialog(QDialog):
         }
         self.duration.addItems(self.durations)
         self.duration.setFixedWidth(250)
-        formLayout.addRow('Duration', self.duration)
+        form_layout.addRow('Duration', self.duration)
 
-        # Automate Recording
+    def automate_recording(self, form_layout):
+        """ Automate recording UI"""
         auto_label = QLabel('Auto Recording')
-        formLayout.addRow(auto_label)
+        form_layout.addRow(auto_label)
 
         # Automatic Recording
         self.auto_radio = QRadioButton("Yes")
         self.auto_radio.setChecked(True)
         self.auto_radio.recording = "yes"
         self.auto_radio.toggled.connect(self.hideAvailTime)
-        formLayout.addRow(self.auto_radio)
+        form_layout.addRow(self.auto_radio)
 
         # Manual Recording
         self.manual_radio = QRadioButton("No")
         self.manual_radio.recording = "no"
         self.manual_radio.toggled.connect(self.displayAvailTime)
-        formLayout.addRow(self.manual_radio)
+        form_layout.addRow(self.manual_radio)
 
-        # Display time when manual recording is activated
+    def am_checkboxes(self, form_layout):
+        """ Checkboxes for managing AM time for manual recording """
         self.groupTimebox = QGroupBox("AM")
         self.groupTimebox.hide()
-        formLayout.addRow(self.groupTimebox)
+        form_layout.addRow(self.groupTimebox)
         time_layout = QGridLayout()
         self.groupTimebox.setLayout(time_layout)
-        self.am_12 = QCheckBox("12:00 AM")
-        self.am_12.value = "12"
-        time_layout.addWidget(self.am_12, 0,0)
 
-        self.am_1 = QCheckBox("1:00 AM")
-        self.am_1.value = "1"
-        time_layout.addWidget(self.am_1, 0,1)
+        am_12 = QCheckBox("12:00 AM")
+        am_12.value = 0
+        time_layout.addWidget(am_12, 0, 0)
 
-        self.am_2 = QCheckBox("2:00 AM")
-        self.am_1.value = "2"
-        time_layout.addWidget(self.am_2, 0,2)
+        am_1 = QCheckBox("1:00 AM")
+        am_1.value = 1
+        time_layout.addWidget(am_1, 0, 1)
 
-        self.am_3 = QCheckBox("3:00 AM")
-        self.am_3.value = "3"
-        time_layout.addWidget(self.am_3, 0,3)
+        am_2 = QCheckBox("2:00 AM")
+        am_2.value = 2
+        time_layout.addWidget(self.am_2, 0, 2)
 
-        self.am_4 = QCheckBox("4:00 AM")
-        self.am_4.value = "4"
-        time_layout.addWidget(self.am_4, 1,0)
+        am_3 = QCheckBox("3:00 AM")
+        am_3.value = 3
+        time_layout.addWidget(am_3, 0, 3)
 
-        self.am_5 = QCheckBox("5:00 AM")
-        self.am_5.value = "5"
-        time_layout.addWidget(self.am_5, 1,1)
+        am_4 = QCheckBox("4:00 AM")
+        am_4.value = 4
+        time_layout.addWidget(am_4, 1, 0)
 
-        self.am_6 = QCheckBox("6:00 AM")
-        self.am_6 = "6"
-        time_layout.addWidget(self.am_6, 1,2)
+        am_5 = QCheckBox("5:00 AM")
+        am_5.value = 5
+        time_layout.addWidget(am_5, 1, 1)
 
-        self.am_7 = QCheckBox("7:00 AM")
-        self.am_7 = "7"
-        time_layout.addWidget(self.am_7, 1,3)
+        am_6 = QCheckBox("6:00 AM")
+        am_6.value = 6
+        time_layout.addWidget(am_6, 1, 2)
 
-        self.am_8 = QCheckBox("8:00 AM")
-        self.am_8 = "8"
-        time_layout.addWidget(self.am_8, 2,0)
+        am_7 = QCheckBox("7:00 AM")
+        am_7.value = 7
+        time_layout.addWidget(am_7, 1, 3)
+
+        am_8 = QCheckBox("8:00 AM")
+        am_8.value = 8
+        time_layout.addWidget(am_8, 2, 0)
+
         am_9 = QCheckBox("9:00 AM")
-        time_layout.addWidget(am_9, 2,1)
+        am_9.value = 9
+        time_layout.addWidget(am_9, 2, 1)
+
         am_10 = QCheckBox("10:00 AM")
-        time_layout.addWidget(am_10, 2,2)
+        am_10.value = 10
+        time_layout.addWidget(am_10, 2, 2)
+
         am_11 = QCheckBox("11:00 AM")
-        time_layout.addWidget(am_11, 2,3)
-        # Display time when manual recording is activated
+        am_11.value = 11
+        time_layout.addWidget(am_11, 2, 3)
+
+    def pm_checkboxes(self, form_layout ):
+        """ Checkboxes for managing PM time for manual recording """
         self.groupTimePMbox = QGroupBox("PM")
         self.groupTimePMbox.hide()
-        formLayout.addRow(self.groupTimePMbox)
-        timePM_layout = QGridLayout()
-        self.groupTimePMbox.setLayout(timePM_layout)
+        form_layout.addRow(self.groupTimePMbox)
+        pm_time_layout = QGridLayout()
+        self.groupTimePMbox.setLayout(pm_time_layout)
         pm_12 = QCheckBox("12:00 PM")
-        timePM_layout.addWidget(pm_12, 0, 0)
+        pm_12.value = 12
+        pm_time_layout.addWidget(pm_12, 0, 0)
+
         pm_1 = QCheckBox("1:00 PM")
-        timePM_layout.addWidget(pm_1, 0, 1)
+        pm_12.value = 13
+        pm_time_layout.addWidget(pm_1, 0, 1)
+
         pm_2 = QCheckBox("2:00 PM")
-        timePM_layout.addWidget(pm_2, 0, 2)
+        pm_2.value = 14
+        pm_time_layout.addWidget(pm_2, 0, 2)
+
         pm_3 = QCheckBox("3:00 PM")
-        timePM_layout.addWidget(pm_3, 0, 3)
+        pm_3.value = 15
+        pm_time_layout.addWidget(pm_3, 0, 3)
+
         pm_4 = QCheckBox("4:00 PM")
-        timePM_layout.addWidget(pm_4, 1, 0)
+        pm_4.value = 16
+        pm_time_layout.addWidget(pm_4, 1, 0)
+
         pm_5 = QCheckBox("5:00 PM")
-        timePM_layout.addWidget(pm_5, 1, 1)
+        pm_5.value = 17
+        pm_time_layout.addWidget(pm_5, 1, 1)
+
         pm_6 = QCheckBox("6:00 PM")
-        timePM_layout.addWidget(pm_6, 1, 2)
+        pm_6.value = 18
+        pm_time_layout.addWidget(pm_6, 1, 2)
+
         pm_7 = QCheckBox("7:00 PM")
-        timePM_layout.addWidget(pm_7, 1, 3)
+        pm_7.value = 19
+        pm_time_layout.addWidget(pm_7, 1, 3)
+
         pm_8 = QCheckBox("8:00 PM")
-        timePM_layout.addWidget(pm_8, 2, 0)
+        pm_8.value = 20
+        pm_time_layout.addWidget(pm_8, 2, 0)
+
         pm_9 = QCheckBox("9:00 PM")
-        timePM_layout.addWidget(pm_9, 2, 1)
+        pm_9.value = 21
+        pm_time_layout.addWidget(pm_9, 2, 1)
+
         pm_10 = QCheckBox("10:00 PM")
-        timePM_layout.addWidget(pm_10, 2, 2)
+        pm_10.value = 22
+        pm_time_layout.addWidget(pm_10, 2, 2)
+
         pm_11 = QCheckBox("11:00 PM")
-        timePM_layout.addWidget(pm_11, 2, 3)
+        pm_11.value = 23
+        pm_time_layout.addWidget(pm_11, 2, 3)
 
     def load_saved_data(self):
         """ Preload data """
+        pass
 
 
     def save_data(self):
@@ -293,9 +342,6 @@ class SettingsDialog(QDialog):
                 # 'recording_time': setting_obj.recording_time
             }
             print(data)
-
-
-
 
 
     def display_msg(self, error, type, proceed=False, autostart=True):
