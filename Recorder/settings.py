@@ -189,7 +189,7 @@ class SettingsDialog(QDialog):
 
         am_2 = QCheckBox("2:00 AM")
         am_2.value = 2
-        time_layout.addWidget(self.am_2, 0, 2)
+        time_layout.addWidget(am_2, 0, 2)
 
         am_3 = QCheckBox("3:00 AM")
         am_3.value = 3
