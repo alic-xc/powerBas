@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (QApplication, QDialog, QDialogButtonBox, QGridLayou
                              QLabel, QComboBox, QGroupBox, QVBoxLayout, QFormLayout, QRadioButton, QHBoxLayout,
                              QFileDialog, QPushButton, QCheckBox, QLayout, QMessageBox)
 from Sounder.device_lists import SounderDevices
-from sqlalchemy import create_engine
+from db import DBWrapper
 import os
 import sys
 
@@ -31,8 +31,7 @@ class SettingsDialog(QDialog):
 
         # Initialize a connection to the database
         try:
-            self.engine
-
+            self.db = DBWrapper()
         except Exception as error:
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Critical)
@@ -141,19 +140,22 @@ class SettingsDialog(QDialog):
         self.duration.setFixedWidth(250)
         formLayout.addRow('Duration', self.duration)
 
-        # Automated Recording
+        # Automate Recording
         auto_label = QLabel('Auto Recording')
         formLayout.addRow(auto_label)
 
-        auto_radio = QRadioButton("Yes")
-        auto_radio.setChecked(True)
-        auto_radio.recording = "yes"
-        auto_radio.toggled.connect(self.hideAvailTime)
-        formLayout.addRow(auto_radio)
-        manual_radio = QRadioButton("No")
-        manual_radio.recording = "no"
-        manual_radio.toggled.connect(self.displayAvailTime)
-        formLayout.addRow(manual_radio)
+        # Automatic Recording
+        self.auto_radio = QRadioButton("Yes")
+        self.auto_radio.setChecked(True)
+        self.auto_radio.recording = "yes"
+        self.auto_radio.toggled.connect(self.hideAvailTime)
+        formLayout.addRow(self.auto_radio)
+
+        # Manual Recording
+        self.manual_radio = QRadioButton("No")
+        self.manual_radio.recording = "no"
+        self.manual_radio.toggled.connect(self.displayAvailTime)
+        formLayout.addRow(self.manual_radio)
 
         # Display time when manual recording is activated
         self.groupTimebox = QGroupBox("AM")
@@ -161,24 +163,41 @@ class SettingsDialog(QDialog):
         formLayout.addRow(self.groupTimebox)
         time_layout = QGridLayout()
         self.groupTimebox.setLayout(time_layout)
-        am_12 = QCheckBox("12:00 AM")
-        time_layout.addWidget(am_12, 0,0)
-        am_1 = QCheckBox("1:00 AM")
-        time_layout.addWidget(am_1, 0,1)
-        am_2 = QCheckBox("2:00 AM")
-        time_layout.addWidget(am_2, 0,2)
-        am_3 = QCheckBox("3:00 AM")
-        time_layout.addWidget(am_3, 0,3)
-        am_4 = QCheckBox("4:00 AM")
-        time_layout.addWidget(am_4, 1,0)
-        am_5 = QCheckBox("5:00 AM")
-        time_layout.addWidget(am_5, 1,1)
-        am_6 = QCheckBox("6:00 AM")
-        time_layout.addWidget(am_6, 1,2)
-        am_7 = QCheckBox("7:00 AM")
-        time_layout.addWidget(am_7, 1,3)
-        am_8 = QCheckBox("8:00 AM")
-        time_layout.addWidget(am_8, 2,0)
+        self.am_12 = QCheckBox("12:00 AM")
+        self.am_12.value = "12"
+        time_layout.addWidget(self.am_12, 0,0)
+
+        self.am_1 = QCheckBox("1:00 AM")
+        self.am_1.value = "1"
+        time_layout.addWidget(self.am_1, 0,1)
+
+        self.am_2 = QCheckBox("2:00 AM")
+        self.am_1.value = "2"
+        time_layout.addWidget(self.am_2, 0,2)
+
+        self.am_3 = QCheckBox("3:00 AM")
+        self.am_3.value = "3"
+        time_layout.addWidget(self.am_3, 0,3)
+
+        self.am_4 = QCheckBox("4:00 AM")
+        self.am_4.value = "4"
+        time_layout.addWidget(self.am_4, 1,0)
+
+        self.am_5 = QCheckBox("5:00 AM")
+        self.am_5.value = "5"
+        time_layout.addWidget(self.am_5, 1,1)
+
+        self.am_6 = QCheckBox("6:00 AM")
+        self.am_6 = "6"
+        time_layout.addWidget(self.am_6, 1,2)
+
+        self.am_7 = QCheckBox("7:00 AM")
+        self.am_7 = "7"
+        time_layout.addWidget(self.am_7, 1,3)
+
+        self.am_8 = QCheckBox("8:00 AM")
+        self.am_8 = "8"
+        time_layout.addWidget(self.am_8, 2,0)
         am_9 = QCheckBox("9:00 AM")
         time_layout.addWidget(am_9, 2,1)
         am_10 = QCheckBox("10:00 AM")
@@ -217,7 +236,8 @@ class SettingsDialog(QDialog):
         timePM_layout.addWidget(pm_11, 2, 3)
 
     def load_saved_data(self):
-        """  """
+        """ Preload data """
+
 
     def save_data(self):
         """ Get all saved data """
@@ -227,6 +247,7 @@ class SettingsDialog(QDialog):
         channel = self.channel_list.get(self.channel.currentText())
         directory = self.display_dir.text()
         duration = self.durations.get(self.duration.currentText())
+        automate_recording = True if self.auto_radio.isChecked() else False
         passed = True
         msg = []
 
@@ -247,26 +268,35 @@ class SettingsDialog(QDialog):
             passed = False
 
         if not os.path.isdir(directory):
-            msg.append("Recording destination not recognised")
+            msg.append("Recording destination not exist/recognised")
             passed = False
 
         if duration is None:
             msg.append("Duration not recognised")
             passed = False
 
+        if automate_recording == True:
+            print()
+
+
         if not passed:
             self.display_msg(msg, 'warning', proceed=True)
         else:
-            pass
+            data = {
+                'device': device,
+                'sampling_rate': sampling_rate,
+                'bit_rate': bit_rate,
+                'channel': channel,
+                'destination': directory,
+                'duration': duration,
+                'automatic_recording': automate_recording,
+                # 'recording_time': setting_obj.recording_time
+            }
+            print(data)
 
 
 
-        print(device)
-        print(sampling_rate)
-        print(bit_rate)
-        print(channel)
-        print(duration)
-        print(directory)
+
 
     def display_msg(self, error, type, proceed=False, autostart=True):
         msg = QMessageBox()
