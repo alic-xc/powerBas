@@ -227,7 +227,7 @@ class SettingsDialog(QDialog):
         am_11.value = 11
         time_layout.addWidget(am_11, 2, 3)
 
-    def _pm_checkboxes(self, form_layout ):
+    def _pm_checkboxes(self, form_layout):
         """ Checkboxes for managing PM time for manual recording """
         self.groupTimePMbox = QGroupBox("PM")
         self.groupTimePMbox.hide()
@@ -239,7 +239,7 @@ class SettingsDialog(QDialog):
         pm_time_layout.addWidget(pm_12, 0, 0)
 
         pm_1 = QCheckBox("1:00 PM")
-        pm_12.value = 13
+        pm_1.value = 13
         pm_time_layout.addWidget(pm_1, 0, 1)
 
         pm_2 = QCheckBox("2:00 PM")
@@ -286,7 +286,6 @@ class SettingsDialog(QDialog):
         """ Preload data """
         pass
 
-
     def save_data(self):
         """ Get all saved data """
         device = self.device_list.get(self.devices.currentText())
@@ -323,9 +322,8 @@ class SettingsDialog(QDialog):
             msg.append("Duration not recognised")
             passed = False
 
-        if automate_recording == True:
-            print()
-
+        if not automate_recording:
+            time_digits = self.get_selected_time()
 
         if not passed:
             self.display_msg(msg, 'warning', proceed=True)
@@ -338,14 +336,31 @@ class SettingsDialog(QDialog):
                 'destination': directory,
                 'duration': duration,
                 'automatic_recording': automate_recording,
-                # 'recording_time': setting_obj.recording_time
             }
+            if not automate_recording:
+                data['recording_time'] = time_digits
+
             print(data)
+
+    def get_selected_time(self):
+        """ Get all selected time if automatic recording is False """
+        time_digits = []
+
+        for element in self.groupTimebox.children():
+            if type(element) == QCheckBox:
+                if element.isChecked():
+                    time_digits.append(element.value)
+
+        for element in self.groupTimePMbox.children():
+            if type(element) == QCheckBox:
+                if element.isChecked():
+                    time_digits.append(element.value)
+
+        return time_digits
 
 
     def display_msg(self, error, type, proceed=False, autostart=True):
         msg = QMessageBox()
-
         if type == 'critical':
             msg.setIcon(QMessageBox.Critical)
         elif type == 'warning':
@@ -381,7 +396,6 @@ class SettingsDialog(QDialog):
         """ Select or change the recording destination. """
         select_directory = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
         self.display_dir.setText(select_directory)
-        print(select_directory)
 
 
 if __name__ == '__main__':
