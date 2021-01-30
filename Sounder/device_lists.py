@@ -18,7 +18,6 @@ class SounderDevices(PyAudio):
             devices = {}
             for d in range(numdevices):
                 if (self.get_device_info_by_host_api_device_index(i, d).get('maxInputChannels')) > 0:
-                    print(self.get_device_info_by_host_api_device_index(i, d))
                     device_name = self.get_device_info_by_host_api_device_index(i, d).get('name')
                     devices[device_name] = d
 
